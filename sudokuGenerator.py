@@ -37,9 +37,11 @@ class Sudoku:
         for num in num_list:
             if self.is_safe(row, col, num):
                 self.grid[row][col].number = num
+                print(f"{row * 9 + col} filled")
                 if self._fill_values(row, col + 1):
                     return True
                 self.grid[row][col].number = 0  # backtrack
+
         return False
 
     def is_safe(self, row, col, num):

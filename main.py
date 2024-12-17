@@ -1,3 +1,5 @@
+from pygame import K_BACKSPACE
+
 from sudokuGenerator import Sudoku
 import pygame
 import sys
@@ -71,12 +73,15 @@ def main():
 
             if event.type == pygame.KEYDOWN and selected_cell:
                 row, col = selected_cell
+                if sudoku.grid[row][col].is_original:
+                    continue
                 if event.unicode.isdigit():
-                    if event.unicode == '0':
-                        sudoku.grid[row][col].number = 0
-                    else:
-                        cur_num = str(sudoku.grid[row][col].number)
-                        sudoku.grid[row][col].number = int(cur_num + event.unicode)
+                    cur_num = str(sudoku.grid[row][col].number)
+                    if len(cur_num) > 3:
+                        continue
+                    sudoku.grid[row][col].number = int(cur_num + event.unicode)
+                elif event.key == K_BACKSPACE:
+                    sudoku.grid[row][col].number = 0
 
         pygame.display.flip()
 
