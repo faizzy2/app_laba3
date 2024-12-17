@@ -3,22 +3,22 @@ from random import shuffle
 
 
 class Cell:
-    def __init__(self, number, original: bool):
+    def __init__(self, number, is_original: bool):
         self.number = number
-        self.original = original
+        self.is_original = is_original
 
 class Sudoku:
     def __init__(self, size = 9):
         self.size = size
         self.subgrid_size = int(size ** 0.5)
         self.grid = [[Cell(0, True) for i in range(size)] for _ in range(size)]
-        self.filled_grid = [[Cell(0, True) for i in range(size)] for _ in range(size)]
+        self.filled_grid = [[0 for i in range(size)] for _ in range(size)]
 
     def fill_grid(self, remove_count = 40):
         self._fill_values()
         for row in range(self.size):
             for column in range (self.size):
-                self.filled_grid[row][column].number = self.grid[row][column].number
+                self.filled_grid[row][column] = self.grid[row][column].number
         self.remove_numbers(remove_count)
 
     def _fill_values(self, row = 0, col = 0):
@@ -37,7 +37,6 @@ class Sudoku:
         for num in num_list:
             if self.is_safe(row, col, num):
                 self.grid[row][col].number = num
-                self.grid[row][col].original = True
                 if self._fill_values(row, col + 1):
                     return True
                 self.grid[row][col].number = 0  # backtrack
@@ -72,12 +71,11 @@ class Sudoku:
             index = filled.pop(0)
             backup = self.grid[index//self.size][index%self.size].number  # сохраняем число для восстановления
             self.grid[index//self.size][index%self.size].number = 0  # удаляем число
-            self.grid[index // self.size][index % self.size].original = False
-
+            self.grid[index // self.size][index % self.size].is_original = False
             # Проверяем, есть ли еще одно уникальное решение
             if not self.has_unique_solution():
                 self.grid[index//self.size][index%self.size].number = backup  # восстанавливаем число
-                self.grid[index // self.size][index % self.size].original = True
+                self.grid[index // self.size][index % self.size].is_original = True
             else:
                 num_to_remove -= 1
                 print(f"{num_to_remove} remained to remove")
@@ -118,8 +116,8 @@ class Sudoku:
         print("---------------------------------------")
         for row in range(self.size):
             for column in range(self.size):
-                if self.filled_grid[row][column].number != 0:
-                    print(self.filled_grid[row][column].number, end=" ")
+                if self.filled_grid[row][column] != 0:
+                    print(self.filled_grid[row][column], end=" ")
                 else:
                     print(".", end=" ")
             print()
