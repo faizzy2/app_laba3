@@ -7,21 +7,23 @@ class Cell:
         self.number = number
         self.is_original = is_original
 
+
 class Sudoku:
-    def __init__(self, size = 9):
+    def __init__(self, size=9):
         self.size = size
         self.subgrid_size = int(size ** 0.5)
         self.grid = [[Cell(0, True) for i in range(size)] for _ in range(size)]
         self.filled_grid = [[0 for i in range(size)] for _ in range(size)]
 
-    def fill_grid(self, remove_count = 40):
+    def fill_grid(self, filled_count):
         self._fill_values()
         for row in range(self.size):
-            for column in range (self.size):
+            for column in range(self.size):
                 self.filled_grid[row][column] = self.grid[row][column].number
+        remove_count = self.size ** 2 - filled_count
         self.remove_numbers(remove_count)
 
-    def _fill_values(self, row = 0, col = 0):
+    def _fill_values(self, row=0, col=0):
         if row == self.size - 1 and col == self.size:
             return True
         if col == self.size:
@@ -37,6 +39,7 @@ class Sudoku:
         for num in num_list:
             if self.is_safe(row, col, num):
                 self.grid[row][col].number = num
+                self.grid[row][col].is_original = True
                 print(f"{row * 9 + col} filled")
                 if self._fill_values(row, col + 1):
                     return True
@@ -53,7 +56,6 @@ class Sudoku:
         for r in range(self.size):
             if self.grid[r][col].number == num:
                 return False
-
         # Проверить подматрицу
         box_row_start = row - row % self.subgrid_size
         box_col_start = col - col % self.subgrid_size
@@ -71,13 +73,18 @@ class Sudoku:
             if len(filled) == 0:
                 break
             index = filled.pop(0)
-            backup = self.grid[index//self.size][index%self.size].number  # сохраняем число для восстановления
-            self.grid[index//self.size][index%self.size].number = 0  # удаляем число
-            self.grid[index // self.size][index % self.size].is_original = False
+            backup = self.grid[index // self.size][
+                index % self.size].number  # сохраняем число для восстановления
+            self.grid[index // self.size][
+                index % self.size].number = 0  # удаляем число
+            self.grid[index // self.size][
+                index % self.size].is_original = False
             # Проверяем, есть ли еще одно уникальное решение
             if not self.has_unique_solution():
-                self.grid[index//self.size][index%self.size].number = backup  # восстанавливаем число
-                self.grid[index // self.size][index % self.size].is_original = True
+                self.grid[index // self.size][
+                    index % self.size].number = backup  # восстанавливаем число
+                self.grid[index // self.size][
+                    index % self.size].is_original = True
             else:
                 num_to_remove -= 1
                 print(f"{num_to_remove} remained to remove")
@@ -85,7 +92,7 @@ class Sudoku:
     def has_unique_solution(self):
         count = [0]  # используем список для изменения в замыкании
 
-        def solve_sudoku(row = 0, col = 0):
+        def solve_sudoku(row=0, col=0):
             if row == self.size - 1 and col == self.size:
                 count[0] += 1
                 return
@@ -107,13 +114,18 @@ class Sudoku:
         solve_sudoku()
         return count[0] == 1  # должны быть только одно решение
 
+    def clear(self):
+        for row in range(self.size):
+            for col in range(self.size):
+                self.grid[row][col].number = 0
+
     def print_grid(self):
         for row in range(self.size):
             for column in range(self.size):
                 if self.grid[row][column].number != 0:
-                    print(self.grid[row][column].number, end = " ")
+                    print(self.grid[row][column].number, end=" ")
                 else:
-                    print(".", end = " ")
+                    print(".", end=" ")
             print()
         print("---------------------------------------")
         for row in range(self.size):
